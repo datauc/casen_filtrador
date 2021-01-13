@@ -1,0 +1,26 @@
+{
+    "id": "F0FC7A52",
+    "path": "~/Casen/casen_filtrador/ui.R",
+    "project_path": "ui.R",
+    "type": "r_source",
+    "hash": "2181554637",
+    "contents": "",
+    "dirty": false,
+    "created": 1610573837186.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "cursorPosition": "19,24",
+        "scrollLine": "13",
+        "docOutlineVisible": "1",
+        "docOutlineSize": "162"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1610574971,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1610574971578,
+    "read_only": false,
+    "read_only_alternatives": []
+}

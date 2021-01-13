@@ -1,0 +1,44 @@
+library(tidyverse)
+library(mefa)
+
+#Importar
+load("~/Casen/Casen 2017.Rdata")
+
+#Filtrar
+casen_t <- casen %>%
+  filter(region=="Región de Tarapacá")
+
+#Expandir
+casen_w <- rep(casen_t, times=casen_t$expc)
+
+#dim(casen_w)
+
+#levels(casen_w$edad)
+
+#Crear variables
+casen <- casen_w %>%
+  mutate(pobreza_simple = case_when(pobreza == "No pobres" ~ "No pobres",
+                                    is.na(pobreza) ~ NA_character_,
+                                    TRUE ~ "Pobres")) %>%
+  mutate(pobreza_extrema = case_when(pobreza == "Pobres extremos" ~ "Pobreza extrema",
+                                     is.na(pobreza) ~ NA_character_,
+                                     TRUE ~ "Fuera de pobreza extrema")) %>%
+  mutate(pobreza_no_extrema = case_when(pobreza == "Pobres no extremos" ~ "Pobreza no extrema",
+                                        is.na(pobreza) ~ NA_character_,
+                                        TRUE ~ "Fuera de pobreza extrema")) %>%
+  mutate(nacionalidad = case_when(r1a == "Otra nacionalidad. Especifique país" ~ "Extranjero",
+                                  TRUE ~ "Chileno")) %>%
+  mutate(nacionalidad_pobreza = fct_cross(pobreza_simple, nacionalidad, sep="-")) %>%
+  mutate(jefatura = case_when(pco1 == "Jefe(a) de hogar" & sexo =="Mujer" ~ "Jefatura femenina",
+                              pco1 == "Jefe(a) de hogar" & sexo =="Hombre" ~ "Jefatura masculina")) %>%
+  mutate(originario = case_when(r3 == "No pertenece a ningún pueblo indígena" ~ "No",
+                                r3 == "No sabe/no responde" ~ "No",
+                                TRUE ~ "Sí")) %>%
+  mutate(nna = ifelse(edad <= 15, "Sí", "No")) %>%
+  mutate(adulto_mayor = ifelse(edad >= 65, "Sí", "No")) %>%
+  mutate(dependencia = case_when(ch4 == "Recibe ayuda de otra persona para realizar actividades" ~ "Sí", 
+                                 TRUE ~ "No"))
+
+remove(casen_t)
+remove(casen_w)
+save(casen, file="~/Collahuasi/collahuasi_dashboard/data/casen2.Rdata")

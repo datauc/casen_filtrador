@@ -1,0 +1,24 @@
+{
+    "id": "AADF0B14",
+    "path": "~/Collahuasi/datos/casen_procesar.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1610574323973.0,
+    "source_on_save": false,
+    "relative_order": 5,
+    "properties": {
+        "cursorPosition": "44,0",
+        "scrollLine": "26"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1594657568,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1594657568,
+    "read_only": false,
+    "read_only_alternatives": []
+}
