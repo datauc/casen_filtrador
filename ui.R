@@ -3,8 +3,23 @@ library(shinyWidgets)
 
 shinyUI(fluidPage(
 
-    titlePanel("Filtrador Casen"),
+    titlePanel(title = NULL,
+               windowTitle = "Filtrador Casen"),
+    
+    #tipografías
+    tags$style(HTML("@import url('//fonts.googleapis.com/css?family=Open Sans');")), # Importar Open Sans
 
+    fluidRow(
+      column(12,
+      h1("Filtrador Casen"),
+      p("Esta herramienta entrega datos socioeconómicos y poblacionales de grupos sociales que viven condiciones específicas de desigualdad y vulnerabilidad en la Región Metropolitana de Chile."),
+        p("Utilice los botones presentados a continuación para ir filtrando o reduciendo la población total, que cumple con las condiciones seleccionadas.
+        Por ejemplo, seleccionar 'Mujeres' y 'Pobreza extrema' resultará en la cantidad de población que corresponde a dicho grupo social, junto a otros datos tales como sus ingresos."),
+      htmlOutput("texto_filtro"),
+      hr(),
+      )
+    ),
+    
     fluidRow(
         column(5,
                # POBREZA ----
@@ -397,16 +412,23 @@ shinyUI(fluidPage(
                #br(),
                
                #Barras ----
-               h4("Población por comuna"),
-               p("Población de la región de Tarapacá que cumple con los criterios seleccionados"),
+               h3("Población por comuna"),
+               p("Población de la región que cumple con los criterios seleccionados"),
+               pickerInput("selector_comunas_barras",
+                           label = "seleccione las comunas que desea graficar",
+                           width = "100%",
+                           multiple = TRUE,
+                           choices = NULL),
+               br(),
                plotOutput("output_grafico_casen",
-                          height="200px"),
+                          height="300px") %>% shinycssloaders::withSpinner(),
                
+               hr(),
                #Densidad ----
-               h4("Distribución de ingresos"),
+               h3("Distribución de ingresos"),
                p("Representación gráfica de la distribución de los ingresos individuales de acuerdo a los criterios seleccionados. La altura de las curvas indica mayor proporción de personas que perciben la cifra de ingresos indicada en el eje horizontal."),
                plotOutput("output_densidad_casen",
-                          height="300px"),
+                          height="300px") %>% shinycssloaders::withSpinner(),
                br(),
                
                #Opciones para gráfico de densidad ----
@@ -427,9 +449,15 @@ shinyUI(fluidPage(
                
                hr(),
                
+        )#end column
+    ), #end row
+    
+    fluidRow(
+        column(12,
+               hr(),
                #Mapa ----
-               plotOutput("output_mapa_casen",
-                          height="500px"),
+               girafeOutput("output_mapa_casen",
+                          height="800px") %>% shinycssloaders::withSpinner(),
                
                radioGroupButtons(
                    inputId = "selector_tipo_casen",
@@ -441,12 +469,12 @@ shinyUI(fluidPage(
                
                br(),
                
-               materialSwitch(inputId = "expansion_casen", 
-                              label = "Factor de expansión", 
-                              right = FALSE, value = TRUE)
+               # materialSwitch(inputId = "expansion_casen", 
+               #                label = "Factor de expansión", 
+               #                right = FALSE, value = TRUE)
                
                
-               
-        )#end column
-    )#end row
+        )
+    )
+      
 ))

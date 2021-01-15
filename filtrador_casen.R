@@ -1,7 +1,7 @@
 #Filtrador ----
 datos_filtrados <- reactive({
   
-  filtrado <- datos_casen()
+  filtrado <- datos_casen
   
   #Mujeres ----
   if (!is.null(input$mujeres_casen)) { #TRUE
@@ -50,14 +50,14 @@ datos_filtrados <- reactive({
   
   #Percentil ----
   percentil_valor <- reactive({
-    as.integer(input$percentil_slider_casen_casen)/100
+    as.integer(input$percentil_slider_casen)/100
   })
   
   #Cálculo del percentil
   percentil <- reactive({
     
     
-    percentil <- quantile(datos_casen()$ytrabajocorh, 
+    percentil <- quantile(datos_casen$ytrabajocorh, 
                           probs = percentil_valor() )
     percentil
   })
