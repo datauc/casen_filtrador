@@ -8,6 +8,12 @@ shinyServer(function(input, output, session) {
                       choices = datos_casen %>% select(comuna) %>% distinct() %>% pull() %>% as.character(),
                       selected = c("La Florida", "Puente Alto", "La Cisterna", "Cerrillos", "Ñuñoa", "Vitacura", "Providencia", "Maipú", "Santiago")
     )
+  
+  updatePickerInput(session,
+                    inputId = "selector_comunas_gse",
+                    choices = datos_casen %>% select(comuna) %>% distinct() %>% pull() %>% as.character(),
+                    selected = c("Puente Alto", "Providencia", "La Dehesa")
+  )
 
     source("filtrador_casen.R", local = TRUE)
 
@@ -39,14 +45,14 @@ shinyServer(function(input, output, session) {
       as.character(input$selector_tipo_casen)
     })
 
-    #Output gráfico ----
+    #Output barras ----
     output_grafico_casen <- reactive({
       grafico_g <- output_tabla_casen() %>%
         filter(comuna %in% input$selector_comunas_barras) %>%
         ggplot(aes(forcats::fct_reorder(comuna, cantidad, .desc=T),
                    cantidad,
                    fill=cantidad)) +
-        geom_col(width=0.7) +
+        geom_col(width=0.4) +
         geom_text(aes(label = stringr::str_trim(format(cantidad, big.mark =  ".", decimal.mark = ","))),
                   vjust=-0.8,
                   size=4) +
@@ -54,7 +60,8 @@ shinyServer(function(input, output, session) {
              x="") +
         theme_minimal(base_size = 15) +
         viridis::scale_fill_viridis() +
-        scale_y_continuous(expand = expansion(mult=c(0, 0.2))) +
+        scale_y_continuous(expand = expansion(mult=c(0, 0.2)),
+                           labels = function(x) stringr::str_trim(format(x, big.mark = ".", decimal.mark = ","))) +
         theme(legend.position = "none",
               panel.grid.major.x = element_blank(),
               panel.grid.minor.y = element_blank(),
@@ -88,6 +95,7 @@ shinyServer(function(input, output, session) {
           theme_minimal(base_size=15) +
           scale_fill_viridis_d(aesthetics = c("fill", "col")) +
           coord_cartesian(xlim = c(0, 3000000),
+                          clip= "off",
                           #ylim = c(0, 0.000004),
                           expand = FALSE) +
           theme(legend.position = "bottom",
@@ -149,7 +157,92 @@ shinyServer(function(input, output, session) {
 
 
 
-
+#Output gse ----
+    
+    output$output_grafico_gse <- renderPlot({
+      datos_casen %>%
+        filter(comuna %in% input$selector_comunas_gse) %>%
+        #filter(comuna  %in% c("La Florida",
+        #                      "Cerrillos",
+        #                      "Vitacura")) %>%
+        mutate(gse = case_when(numper == 1 & ytotcorh <= 66000 ~ "E", #E
+                               numper == 2 & ytotcorh <= 134000 ~ "E", 
+                               numper == 3 & ytotcorh <= 212000 ~ "E", 
+                               numper == 4 & ytotcorh <= 276000 ~ "E", 
+                               numper == 5 & ytotcorh <= 325000 ~ "E", 
+                               numper >= 6 & ytotcorh <= 382000 ~ "E",
+                               #D
+                               numper == 1 & ytotcorh <= 134000 ~ "D", 
+                               numper == 2 & ytotcorh <= 252000 ~ "D", 
+                               numper == 3 & ytotcorh <= 382000 ~ "D", 
+                               numper == 4 & ytotcorh <= 479000 ~ "D", 
+                               numper == 5 & ytotcorh <= 572000 ~ "D", 
+                               numper >= 6 & ytotcorh <= 661000 ~ "D",
+                               #C3
+                               numper == 1 & ytotcorh <= 258000 ~ "C3", 
+                               numper == 2 & ytotcorh <= 463000 ~ "C3", 
+                               numper == 3 & ytotcorh <= 663000 ~ "C3", 
+                               numper == 4 & ytotcorh <= 830000 ~ "C3", 
+                               numper == 5 & ytotcorh <= 984000 ~ "C3", 
+                               numper >= 6 & ytotcorh <= 1124000 ~ "C3",
+                               #C2
+                               numper == 1 & ytotcorh <= 460000 ~ "C2", 
+                               numper == 2 & ytotcorh <= 824000 ~ "C2", 
+                               numper == 3 & ytotcorh <= 1115000 ~ "C2", 
+                               numper == 4 & ytotcorh <= 1384000 ~ "C2", 
+                               numper == 5 & ytotcorh <= 1650000 ~ "C2", 
+                               numper >= 6 & ytotcorh <= 1750000 ~ "C2",
+                               #C1b
+                               numper == 1 & ytotcorh <= 807000 ~ "C1b", 
+                               numper == 2 & ytotcorh <= 1404000 ~ "C1b", 
+                               numper == 3 & ytotcorh <= 1926000 ~ "C1b", 
+                               numper == 4 & ytotcorh <= 2311000 ~ "C1b", 
+                               numper == 5 & ytotcorh <= 2717000 ~ "C1b", 
+                               numper >= 6 & ytotcorh <= 3005000 ~ "C1b",
+                               #C1a
+                               numper == 1 & ytotcorh <= 1414000 ~ "C1a", 
+                               numper == 2 & ytotcorh <= 2350000 ~ "C1a", 
+                               numper == 3 & ytotcorh <= 3234000 ~ "C1a", 
+                               numper == 4 & ytotcorh <= 3960000 ~ "C1a", 
+                               numper == 5 & ytotcorh <= 4656000 ~ "C1a", 
+                               numper >= 6 & ytotcorh <= 5428000 ~ "C1a",
+                               #AB
+                               numper == 1 & ytotcorh >= 1415000 ~ "AB", 
+                               numper == 2 & ytotcorh >= 2351000 ~ "AB", 
+                               numper == 3 & ytotcorh >= 3235000 ~ "AB", 
+                               numper == 4 & ytotcorh >= 3961000 ~ "AB", 
+                               numper == 5 & ytotcorh >= 4657000 ~ "AB", 
+                               numper >= 6 & ytotcorh >= 5429000 ~ "AB")) %>%
+        mutate(gse = as.factor(gse),
+               gse = forcats::fct_rev(gse)) %>%
+        filter(!is.na(gse)) %>%
+        group_by(comuna) %>%
+        count(gse, name = "cantidad") %>%
+        mutate(porcentaje = cantidad/sum(cantidad)) %>%
+        #graficar
+        ggplot(aes(x = gse, y = porcentaje)) +
+        geom_point(aes(col = comuna,
+                       size = cantidad),
+                   alpha=0.7) +
+        coord_cartesian(clip = "off") +
+        scale_size_continuous(range = c(6, 20),
+                              labels = function(x) format(x, big.mark = ".", decimal.mark = ",")) +
+        viridis::scale_color_viridis(discrete = TRUE) +
+        scale_y_continuous(labels = function(x) paste0(x*100, "%")) +
+        labs(y="Porcentaje de cada comuna",
+             x="Grupos socioeconómicos\n(del más bajo al más alto)",
+             col = "Comunas",
+             size = "Población") +
+        theme_minimal(base_size = 15) +
+        theme(legend.position = "right",
+              panel.grid.major.x = element_blank(),
+              panel.grid.minor.y = element_blank(),
+              axis.text.x = element_text(angle = 90, vjust = 0.5),
+              axis.title.y = element_text(margin=margin(r=10))) +
+        guides(size = guide_legend(override.aes = list(color="gray60")),
+               col = guide_legend(override.aes = list(size=4)))
+      
+    })
 
 
 

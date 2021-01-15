@@ -415,7 +415,7 @@ shinyUI(fluidPage(
                h3("Población por comuna"),
                p("Población de la región que cumple con los criterios seleccionados"),
                pickerInput("selector_comunas_barras",
-                           label = "seleccione las comunas que desea graficar",
+                           label = "Seleccione las comunas que desea graficar:",
                            width = "100%",
                            multiple = TRUE,
                            choices = NULL),
@@ -424,6 +424,7 @@ shinyUI(fluidPage(
                           height="300px") %>% shinycssloaders::withSpinner(),
                
                hr(),
+               
                #Densidad ----
                h3("Distribución de ingresos"),
                p("Representación gráfica de la distribución de los ingresos individuales de acuerdo a los criterios seleccionados. La altura de las curvas indica mayor proporción de personas que perciben la cifra de ingresos indicada en el eje horizontal."),
@@ -449,6 +450,25 @@ shinyUI(fluidPage(
                
                hr(),
                
+               # #Deciles ----
+               # h3("Deciles de ingreso"),
+               # p("Los deciles de ingreso dividen la distribución de los ingresos en 10 sectores, donde cada uno representa a un 10% de las personas, 
+               # e indican el rango de ingresos de cada grupo. 
+               #   Por ejemplo, el decil 1 es el rango de ingresos del 10% con menores ingresos, 
+               #   mientras que el decil 10 es el rango de ingresos del 10% que gana mayores ingresos."),
+               
+               hr(), 
+               #Grupos socioeconómicos ----
+               h3("Grupos socioeconómicos"),
+               p("Los grupos socioeconómicos dividen la población de la región en grupos de acuerdo a los ingresos combinados del hogar y la cantidad de personas que viven en el hogar. El grupo más bajo es el E, que representa a los menores ingresos del país, mientras que el más alto es el AB, con los mayores ingresos del país."),
+               pickerInput("selector_comunas_gse",
+                           label = "Seleccione las comunas que desea graficar:",
+                           width = "100%",
+                           multiple = TRUE,
+                           choices = NULL),
+               plotOutput("output_grafico_gse",
+                          height="400px") %>% shinycssloaders::withSpinner(),
+               
         )#end column
     ), #end row
     
@@ -456,16 +476,18 @@ shinyUI(fluidPage(
         column(12,
                hr(),
                #Mapa ----
-               girafeOutput("output_mapa_casen",
-                          height="800px") %>% shinycssloaders::withSpinner(),
+               h3("Mapa regional"),
                
                radioGroupButtons(
-                   inputId = "selector_tipo_casen",
-                   label = "Tipo de gráfico:",
-                   choices = c("Frecuencia",
-                               "Porcentaje"),
-                   justified = TRUE
+                 inputId = "selector_tipo_casen",
+                 label = "Seleccione el dato por graficar:",
+                 choices = c("Frecuencia",
+                             "Porcentaje"),
+                 justified = TRUE
                ), 
+               
+               girafeOutput("output_mapa_casen",
+                          height="900px") %>% shinycssloaders::withSpinner(),
                
                br(),
                
