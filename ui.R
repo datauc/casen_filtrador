@@ -470,6 +470,31 @@ shinyUI(fluidPage(
            
            
     )
-  )
+  ),
+
+#footer ----
+fluidRow(
+  column(12, align = "center",
+         
+         hr(),
+         p("Plataforma desarrollada por el equipo DATA UC, usando R Shiny"),
+         
+         HTML("<p>Diseño y desarrollo: 
+                    <a href='http://bastian.olea.biz' 
+                       style='color: #999999'>
+                    Bastián Olea Herrera.</a></p>"),
+         
+         p("Facultad de Matemáticas"),
+         p("Pontificia Universidad Católica de Chile"),
+         tags$a(img(
+           src = "logodatauc.png",
+           width = 200, style = "padding: 10px"
+         ),
+         #href = "http://www.mat.uc.cl"
+         hreg = "http://datascience.uc.cl"
+         )
+         
+         
+  )) #end footer
   
 ))
