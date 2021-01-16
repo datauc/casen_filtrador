@@ -19,25 +19,14 @@ shinyServer(function(input, output, session) {
 
     #Output tabla ----
     output_tabla_casen <- reactive({
-
-      # #Base normal sin expansión
-      # if (input$expansion_casen==FALSE) {
         output <- datos_filtrados() %>%
           group_by(comuna) %>%
           count(name="cantidad") %>%
           ungroup() %>%
+          #{if (input$selector_grupo_porcentaje == "Comunal") group_by(., comuna) else .} %>%
           mutate(porcentaje = cantidad/sum(cantidad))
 
-      #   #Cálculo con expansión
-      # } else if (input$expansion_casen==TRUE) {
-      #   output <- datos_filtrados() %>%
-      #     group_by(comuna) %>%
-      #     summarise(cantidad = n()) %>%
-      #     #mutate(cantidad = cantidad*expc) %>%
-      #     mutate(porcentaje = cantidad/sum(cantidad))
-      # }
-
-      output
+      return(output)
     })
 
 
@@ -157,14 +146,79 @@ shinyServer(function(input, output, session) {
 
 
 
+    #Output deciles ----
+    
+    output$output_grafico_deciles <- renderPlot({
+      
+      #crear variable que categoriza a las personas en deciles
+      deciles_2 <- datos_filtrados() %>%
+        select(ytrabajocorh) %>%
+        mutate(decil = case_when(ytrabajocorh <= as.numeric(deciles$`Decil 1`) ~ "Decil 1",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 2`) ~ "Decil 2",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 3`) ~ "Decil 3",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 4`) ~ "Decil 4",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 5`) ~ "Decil 5",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 6`) ~ "Decil 6",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 7`) ~ "Decil 7",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 8`) ~ "Decil 8",
+                                 ytrabajocorh <= as.numeric(deciles$`Decil 9`) ~ "Decil 9",
+                                 ytrabajocorh >  as.numeric(deciles$`Decil 9`) ~ "Decil 10")) %>%
+        count(decil, name ="cantidad") %>%
+        mutate(porcentaje = cantidad/sum(cantidad))
+      
+      
+      deciles_3 <- deciles_2 %>%
+        #crear columna con la cifra de corte de los deciles
+        left_join(deciles %>%
+                    t() %>%
+                    as.data.frame() %>%
+                    tibble::rownames_to_column(var = "decil") %>%
+                    rename(limite = 2) %>%
+                    tibble::as_tibble()) %>%
+        mutate(decil = forcats::fct_reorder(decil, limite),
+               decil = forcats::fct_relevel(decil, "Decil 10", after = 9)) %>%
+        #crear texto que describe los cortes
+        mutate(limite_text = case_when(
+          decil != "Decil 10" & limite < 1000000 ~ paste("Hasta", round(limite/1000), "mil"),
+          decil != "Decil 10" & decil != "Decil 1" & limite >= 1000000 ~ paste("Hasta", round(limite/1000000, 1), "millones"),
+          #decil == "Decil 1" ~ paste("Menos de", round(lead(limite)/1000), "mil"),
+          decil == "Decil 10" ~ paste("Más de 2.4 millones"))
+        )
+      
+      
+      #graficar
+      p <- deciles_3 %>%
+        ggplot(aes(y = decil, x = porcentaje, fill = decil)) +
+        geom_col(width=0.5) +
+        geom_text(aes(label = paste(scales::percent(porcentaje, 
+                                                    accuracy = 0.1), "-",
+                                    limite_text)),
+                  hjust = -0.07, #nudge_x = 0.02,
+                  size=4) +
+        viridis::scale_fill_viridis(discrete = TRUE) +
+        scale_y_discrete(drop = FALSE) +
+        coord_cartesian(xlim = c(0, 1)) +
+        theme_minimal(base_size = 15) +
+        theme(legend.position = "none") +
+        theme(panel.grid = element_blank(),
+              axis.text.x = element_blank(),
+              axis.text.y = element_text(margin = margin(l =10, r=-10)))+
+        labs(y = "Decil de ingresos",
+             x = "Porcentaje de la población")
+      
+      return(p)
+    })
+    
+    
 #Output gse ----
     
     output$output_grafico_gse <- renderPlot({
-      datos_casen %>%
+      datos_filtrados() %>%
+      #datos_casen %>%
         filter(comuna %in% input$selector_comunas_gse) %>%
-        #filter(comuna  %in% c("La Florida",
-        #                      "Cerrillos",
-        #                      "Vitacura")) %>%
+        # filter(comuna  %in% c("La Florida",
+        #                       "Cerrillos",
+        #                       "Vitacura")) %>%
         mutate(gse = case_when(numper == 1 & ytotcorh <= 66000 ~ "E", #E
                                numper == 2 & ytotcorh <= 134000 ~ "E", 
                                numper == 3 & ytotcorh <= 212000 ~ "E", 
@@ -283,19 +337,9 @@ shinyServer(function(input, output, session) {
                      fill = cantidad )) +
           geom_sf_interactive(col="white",
                               aes(tooltip = paste(comuna, "\n",
-                                                  stringr::str_trim(format(cantidad, big.mark =  ".", decimal.mark = ","))
+                                                  stringr::str_trim(format(cantidad, big.mark =  ".", decimal.mark = ",")),
+                                                  "personas"
                                                   ))) +
-          # geom_sf_label(aes(label = comuna),
-          #               size=4,
-          #               label.padding = unit(0.15, "lines"),
-          #               fill="white",
-          #               color="#999999") +
-          # geom_sf_label(aes(label = stringr::str_trim(format(cantidad, big.mark =  ".", decimal.mark = ","))),
-          #               size=4,
-          #               label.padding = unit(0.15, "lines"),
-          #               nudge_y=-0.08,
-          #               fill="white",
-          #               color="#999999") +
           viridis::scale_fill_viridis(name="Frecuencia",
                                       labels = function(x) format(x, big.mark =  ".", decimal.mark = ",") ) +
           coord_sf(expand = FALSE) +
@@ -314,19 +358,6 @@ shinyServer(function(input, output, session) {
                               aes(tooltip = paste(comuna, "\n",
                                                   stringr::str_trim(paste0(round(porcentaje*100, digits=1),"%"))
                               ))) +
-          # geom_sf_label(aes(label = comuna),
-          #               size=4,
-          #               label.padding = unit(0.15, "lines"),
-          #               fill="white",
-          #               color="#999999") +
-          # geom_sf_label(aes(label = ifelse(comuna!="Colchane",
-          #                                  paste0(round(porcentaje*100, digits=1),"%"),
-          #                                  "NA")),
-          #               size=4,
-          #               label.padding = unit(0.15, "lines"),
-          #               nudge_y=-0.08,
-          #               fill="white",
-          #               color="#999999") +
           viridis::scale_fill_viridis(name="Porcentaje",
                                       labels = function(x) paste0(round(x*100, digits=1),"%") ) +
           coord_sf(expand = FALSE) +

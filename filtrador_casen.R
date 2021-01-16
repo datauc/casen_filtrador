@@ -150,8 +150,8 @@ datos_filtrados <- reactive({
   } else if (input$zona_casen == "Rural") { #TRUE 2
     filtrado <- filtrado %>%
       filter(zona == "Rural")
-  } else if (!is.null(input$zona_casen)) { #FALSE?
-    filtrado <- filtrado
+  # } else if (!is.null(input$zona_casen)) { #FALSE?
+  #   filtrado <- filtrado
   }
   
   
